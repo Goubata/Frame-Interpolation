@@ -45,4 +45,7 @@ jobs:
         "${{ github.event.inputs.output_name }}.mp4"
 
     - name: Upload artifact
-      uses: actions/upload-
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.inputs.output_name }}
+        path: ${{ github.event.inputs.output_name }}.mp4
