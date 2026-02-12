@@ -23,7 +23,7 @@ jobs:
 
     - name: Download video
       run: |
-        curl -L "${{ github.event.inputs.video_url }}" -o input.mp4
+        wget -O input.mp4 "${{ github.event.inputs.video_url }}"
 
     - name: Interpolate to 160fps
       run: |
