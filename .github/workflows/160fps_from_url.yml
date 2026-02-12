@@ -1,0 +1,40 @@
+name: 160fps From URL
+
+on:
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: "Direct video URL (mp4など直リンク)"
+        required: true
+      output_name:
+        description: "Output filename (without .mp4)"
+        required: true
+        default: "output_160fps"
+
+jobs:
+  interpolate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install FFmpeg & curl
+      run: |
+        sudo apt update
+        sudo apt install -y ffmpeg curl
+
+    - name: Download video
+      run: |
+        curl -L "${{ github.event.inputs.video_url }}" -o input.mp4
+
+    - name: Interpolate to 160fps
+      run: |
+        ffmpeg -y -i input.mp4 \
+        -vf "minterpolate=fps=160:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1" \
+        -c:v libx264 -preset veryslow -crf 14 \
+        -c:a aac -b:a 192k \
+        "${{ github.event.inputs.output_name }}.mp4"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.inputs.output_name }}
+        path: ${{ github.event.inputs.output_name }}.mp4
