@@ -1,10 +1,10 @@
-name: 160fps From URL
+name: 160fps From Google Drive
 
 on:
   workflow_dispatch:
     inputs:
-      video_url:
-        description: "Direct video URL (mp4など直リンク)"
+      drive_url:
+        description: "Google Drive share link"
         required: true
       output_name:
         description: "Output filename (without .mp4)"
@@ -16,14 +16,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Install FFmpeg & curl
+    - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y ffmpeg curl
+        sudo apt install -y ffmpeg python3-pip
+        pip install gdown
 
-    - name: Download video
+    - name: Download from Google Drive
       run: |
-        wget -O input.mp4 "${{ github.event.inputs.video_url }}"
+        gdown "${{ github.event.inputs.drive_url }}" -O input.mp4
+
+    - name: Check file
+      run: |
+        ls -lh
+        file input.mp4
 
     - name: Interpolate to 160fps
       run: |
