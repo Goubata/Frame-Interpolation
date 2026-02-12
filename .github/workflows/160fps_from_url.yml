@@ -1,10 +1,10 @@
-name: 160fps From Google Drive
+name: 160fps From Any Google Drive URL
 
 on:
   workflow_dispatch:
     inputs:
       drive_url:
-        description: "Google Drive share link"
+        description: "Any Google Drive share URL"
         required: true
       output_name:
         description: "Output filename (without .mp4)"
@@ -22,11 +22,22 @@ jobs:
         sudo apt install -y ffmpeg python3-pip
         pip install gdown
 
+    - name: Extract File ID
+      id: extract
+      run: |
+        URL="${{ github.event.inputs.drive_url }}"
+        FILE_ID=$(echo "$URL" | sed -n 's/.*\/d\/\([^\/]*\).*/\1/p')
+        if [ -z "$FILE_ID" ]; then
+          FILE_ID=$(echo "$URL" | sed -n 's/.*id=\([^&]*\).*/\1/p')
+        fi
+        echo "FILE_ID=$FILE_ID" >> $GITHUB_ENV
+        echo "Extracted FILE_ID=$FILE_ID"
+
     - name: Download from Google Drive
       run: |
-        gdown "${{ github.event.inputs.drive_url }}" -O input.mp4
+        gdown "$FILE_ID" -O input.mp4
 
-    - name: Check file
+    - name: Verify Download
       run: |
         ls -lh
         file input.mp4
